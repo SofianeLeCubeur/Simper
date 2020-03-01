@@ -53,11 +53,23 @@ class Divide extends Node {
         this.addInput(0, 'X', 'number', '#fd696b');
         this.addInput(1, 'q', 'number', '#6797ff');
         this.addOutput(0, 'Q', 'number', '#ffd686');
-        this.addOutput(1, 'r', 'number', '#ffd686');
         this.setWidth(110);
         this._generator = function(stateInputs, stateOutputs){
-            stateOutputs[0] = Math.round(stateInputs[0] / stateInputs[1]);
-            stateOutputs[1] = stateInputs[0] % stateInputs[1];
+            stateOutputs[0] = stateInputs[0] / stateInputs[1];
+        };
+    }
+}
+
+class Modulo extends Node {
+    
+    constructor(id, name = 'Modulo', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'number', '#fd696b');
+        this.addInput(1, 'q', 'number', '#6797ff');
+        this.addOutput(0, 'r', 'number', '#ffd686');
+        this.setWidth(110);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = stateInputs[0] % stateInputs[1];
         };
     }
 }
@@ -203,7 +215,7 @@ class Remap extends Node {
         this.addInput(1, 'In Scale (2)', 'vector2', '#ff86a1');
         this.addInput(2, 'Out Scale (2)', 'vector2', '#ac7cff');
         this.addOutput(0, 'Out', 'number', '#ffd686');
-        this.setWidth(180);
+        this.setWidth(185);
         this._generator = function(stateInputs, stateOutputs){
             let value = stateInputs[0];
             let inScale = stateInputs[1];
@@ -676,6 +688,7 @@ export default {
         Multiply3,
         Power,
         Divide,
+        Modulo,
         Sqrt,
         
         Sine,
@@ -712,10 +725,10 @@ export default {
     },
     inputs: {
         Vector2,
-        'Vector2 Constant': Vector2Constant,
+        Vector2Constant,
         Vector3,
-        'Vector3 Constant': Vector3Constant,
+        Vector3Constant,
         Vector4,
-        'Vector4 Constant': Vector4Constant
+        Vector4Constant
     }
 };

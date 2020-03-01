@@ -69,9 +69,9 @@ export default {
     nodes: {},
     inputs: {
         String,
-        'String Constant': StringConstant,
+        StringConstant,
         Number,
-        'Number Constant': NumberConstant,
+        NumberConstant,
         Boolean
     }
 }

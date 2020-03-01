@@ -23,11 +23,12 @@
             :lock="mode === 'run'"
             :id="l.id"
             @clicked="removeLink($event, key)"
-            @click="pass = true"></Link>
+            @click="pass = true" />
 
         <NodeSelector :links="links" :activeLink="activeLink" @pushNode="pushNode"></NodeSelector>
 
         <DictionariesDialog @close="updateDictionnaries"></DictionariesDialog>
+        <Console :visible="console_visible" @expand="console_visible = true" @reduce="console_visible = false"></Console>
 
         <div class="border" v-if="showDebugBounds">
             <div class="label" v-if="nodes.length > 0" @click.stop>{{ script_name }}</div>
@@ -42,12 +43,12 @@ import Dialog from './Dialog'
 import Link from './Link'
 import DictionariesDialog from './dialogs/DictionariesDialog'
 import NodeSelector from './NodeSelector'
+import Console from './Console'
 
 import { dragscroll } from 'vue-dragscroll'
 import { ipcRenderer, remote } from 'electron'
 import { mapGetters } from 'vuex'
 
-//import images from './nodes/images'
 import input from './nodes/input'
 import math from './nodes/math'
 import misc from './nodes/misc'
@@ -60,7 +61,7 @@ const os = require('os');
 let rd = () => Math.random();
 
 export default {
-    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector },
+    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console },
     data(){
         return {
             script_name: 'Untitled Script',
@@ -73,7 +74,8 @@ export default {
             pass: false,
             spawnPoint: {},
             mode: 'build',
-            bounds: {}
+            bounds: {},
+            console_visible: false
         }
     },
     mounted(){
@@ -143,7 +145,11 @@ export default {
                 this.click({clientX: 0, clientY: 0});
             }
             else if(payload.type === 'build:run'){
+                const style = 'background-color:rgba(0,0,0,.2);padding:5px;color:#f5f5f5;max-width:100%;width:100%;';
+                let start = Date.now();
+                console.printLog({content: '%cScript Running...', $style: [style]});
                 this.buildpack.run(this.export(0, 0, true),this.nodes);
+                console.printLog({content: '%cScript was ran in ' + (Date.now() - start) / 1000 + 's', $style: [style]});
             } 
             else if(payload.type === 'build:mode:run'){
                 this.mode = 'run';
@@ -618,13 +624,39 @@ export default {
             box-shadow: 0 0 8px 0px rgba(0,0,0,.05);
             outline: none;
             cursor: pointer;
+
+            .hover {
+                display: none;
+            }
             
             &:hover {
                 box-shadow: 0 0 0 1px #4f98ca;
+
+                .standby {
+                    display: none;
+                }
+
+                .hover {
+                    display: initial;
+                }
             }
 
             &:focus {
                 box-shadow: 0 0 0 1px #c9a66f;
+            }
+
+            &.dark {
+                border: 1px solid #333333;
+                background: #131313;
+            }
+
+            &.small {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 3px;
+                width: 32px;
+                height: 32px;
             }
         }
 

@@ -88,7 +88,8 @@ export class Node {
 
     setInput(id, value, verbose=false){
         this._inputStates[id] = value;
-        if(verbose) console.log('%c[Node] (' + this._name + ') Setting input #' + id + ' to ' + value, 'background: #222; color: #bada55')
+        if(verbose) console.printLog({content: '%c[Node] (' + this._name + ') Seting input #' + id + ' to ' + (typeof value === 'object' ? JSON.stringify(value, null, 2) : value), 
+        $style: ['color:#bada55'], tag: 'Debug'})
     }
 
     setPreview(renderer){
@@ -132,10 +133,15 @@ export class Node {
         return this._inputStates[id];
     }
 
+    resetInputStates(){
+        this._inputStates = {};
+    }
+
     getOutputs(verbose=false){
         let outputs = {};
         this._generator(this._inputStates, outputs);
-        if(verbose) console.log('%c[Node] (' + this._name + ') Generator: ', 'background: #222; color:pink', outputs)
+        if(verbose) console.printLog({content: '%c[Node] (' + this._name + ') Generator: %c' + JSON.stringify(outputs, null, 2),
+            $style: ['color:pink','color:hotpink'], tag: 'Debug'})
         return outputs
     }
 

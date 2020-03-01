@@ -14,7 +14,7 @@ export default class Simper extends Buildpack {
 
         while(Object.keys(this.nextNodes).length > 0){
             // Main loop
-            if(verbose) console.log('%c<----%c Run Trace #' + this._run + ' %c---->', 'color:tomato', 'background:tomato;color:white', 'color:tomato');
+            if(verbose) console.printLog({content: '%c├────%c Call Trace #' + this._run + ' %c────┤', $style: ['color:tomato', 'background:tomato;color:white', 'color:tomato'],tag:'Debug'});
             let newNextNodes = {};
             Object.keys(this.nextNodes).forEach(nodeId => {
                 let next_links = this.nextNodes[nodeId];
@@ -36,12 +36,15 @@ export default class Simper extends Buildpack {
     }
 
     prepare(script, nodes){
-        this.nodes = nodes;
+        this.nodes = [...nodes];
         this.links = script.links;
         this.nextNodes = {};
         this.outputs = {};
         this._run = 0;
-        this.nodes.filter(node => node._input).forEach(node => {
+        this.nodes.filter(node => { 
+            node.resetInputStates();
+            return node._input;
+        }).forEach(node => {
             this.nextNodes[node.id] = this.getNext(this.links, node);
             this.outputs[node.id] = node.getOutputs();
         }); // Prepare input nodes
@@ -52,11 +55,11 @@ export default class Simper extends Buildpack {
         links.forEach(link => {
             if(link.from.nid === node.id){ 
                 nodes.push({...link.to, from_io: link.from.oid});
-            } else if(link.to.nid === node.id && !this.outputs[node.id]){
+            } else if(link.to.nid === node.id && (!this.outputs[node.id] || node._input)){
                 // Reversed links: when the user links the two nodes but the from node is actually the to node
                 // [!!!!!!!] TODO: Fix an issue where multiple nodes are called because somehow they match the set of conditions FURTHER DEBUGGING REQUIRED
                 nodes.push({...link.from, from_io: link.to.oid});
-                console.log('current',node.id,node.constructor.name,'from',link.from.nid,'to',link.to.nid);
+                //console.log('current',node.id,node.constructor.name,'from',link.from.nid,'to',link.to.nid);
             }
         });
         return nodes;
