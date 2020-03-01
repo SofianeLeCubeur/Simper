@@ -566,10 +566,37 @@ class Vector2 extends Node {
     }
 }
 
+class Vector2Constant extends Node {
+    constructor(id, name = 'Vector2 Input', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this._inputType = 'number';
+        this._isConstant = true;
+        this.asInput('vector2', (inputs) => {
+            return {x: parseFloat(inputs[0]), y: parseFloat(inputs[1])};
+        });
+        this.addInput(0, 'X', 'number');
+        this.addInput(1, 'Y', 'number');
+    }
+}
+
 class Vector3 extends Node {
     constructor(id, name = 'Vector3 Input', inputs = [], outputs = []){
         super(id, name, inputs, outputs);
         this._inputType = 'number';
+        this.asInput('vector3', (inputs) => {
+            return {x: parseFloat(inputs[0]), y: parseFloat(inputs[1]), z: parseFloat(inputs[2])};
+        });
+        this.addInput(0, 'X', 'number');
+        this.addInput(1, 'Y', 'number');
+        this.addInput(2, 'Z', 'number');
+    }
+}
+
+class Vector3Constant extends Node {
+    constructor(id, name = 'Vector3 Input', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this._inputType = 'number';
+        this._isConstant = true;
         this.asInput('vector3', (inputs) => {
             return {x: parseFloat(inputs[0]), y: parseFloat(inputs[1]), z: parseFloat(inputs[2])};
         });
@@ -593,6 +620,25 @@ class Vector4 extends Node {
     }
 }
 
+class Vector4Constant extends Node {
+    constructor(id, name = 'Vector4 Input', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this._inputType = 'number';
+        this._isConstant = true;
+        this.asInput('vector4', (inputs) => {
+            return {x: parseFloat(inputs[0]), y: parseFloat(inputs[1]), z: parseFloat(inputs[2]), w: parseFloat(inputs[3])};
+        });
+        this.addInput(0, 'X', 'number');
+        this.addInput(1, 'Y', 'number');
+        this.addInput(2, 'Z', 'number');
+        this.addInput(3, 'W', 'number');
+    }
+}
+
+function validNumber(x){
+    return typeof x === 'number' && !isNaN(x)
+}
+
 export default {
     name: 'Math',
     id: 'math',
@@ -603,13 +649,16 @@ export default {
     },
     types: { // Add custom types
         'vector2': {
-            color: '#ffd686', assertation: (vec) => vec.x !== undefined && vec.y !== undefined
+            color: '#ffd686', 
+            assertation: (vec) => vec !== undefined && validNumber(vec.x) && validNumber(vec.y)
         },
         'vector3': {
-            color: '#a0d468', assertation: (vec) => vec.x !== undefined && vec.y !== undefined && vec.z !== undefined
+            color: '#a0d468', 
+            assertation: (vec) => vec !== undefined && validNumber(vec.x) && validNumber(vec.y) && validNumber(vec.z)
         },
         'vector4': {
-            color: '#2ecc96', assertation: (vec) => vec.x !== undefined && vec.y !== undefined && vec.z !== undefined && vec.w !== undefined
+            color: '#2ecc96', 
+            assertation: (vec) => vec !== undefined && validNumber(vec.x) && validNumber(vec.y) && validNumber(vec.z) && vvalidNumber(vec.w)
         }
     },
     nodes: {
@@ -663,7 +712,10 @@ export default {
     },
     inputs: {
         Vector2,
+        'Vector2 Constant': Vector2Constant,
         Vector3,
-        Vector4
+        'Vector3 Constant': Vector3Constant,
+        Vector4,
+        'Vector4 Constant': Vector4Constant
     }
 };

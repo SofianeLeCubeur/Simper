@@ -2,7 +2,7 @@
     <div class="node" :style="`width:${node.width}`" 
         @mousedown="dragStart" @mouseup="dragEnd" @click.stop="$emit('click', $event)"
         tabindex="0" @keyup.delete="deleteNode"
-        :class="{compact: node.isInput, running: !node.isInput && lock, lock: lock}">
+        :class="{compact: node.isInput, running: (!node.isInput || node._isConstant) && lock, lock: lock}">
         <div class="header">
             <div class="title" v-if="!node.isInput">
                 {{ node.name }}
@@ -14,7 +14,15 @@
                     <div v-for="inp in node.inputs" :key="inp.id" class="entry">
                         <p class="large" :class="{sliced: node._inputType === 'disabled'}">{{ inp.name }}</p>
                         <template v-if="node._inputType !== 'disabled'">
-                            <input :type="node._inputType" placeholder="Value" :ref="`in${inp.id}`" @keyup.delete.stop @click.stop v-if="!node.var" :disabled="!lock">
+                            <input 
+                            :type="node._inputType" 
+                            placeholder="Value" 
+                            :ref="`in${inp.id}`"
+                            v-if="!node.var" 
+                            :disabled="node._isConstant && lock || !node._isConstant && !lock"
+                            @mousedown.stop
+                            @keyup.delete.stop 
+                            @click.stop>
                         </template>
                     </div>
                 </div>
@@ -69,6 +77,11 @@ export default {
         }
     },
     mounted(){
+        if(this.node._isConstant){
+            let inputs = {};
+            this.node.inputs.forEach(inp => this.$refs['in' + inp.id][0].value = this.node.getInputState(inp.id));
+        }
+
         if(this.node.spawnPosition){
             this.currentX = this.node.spawnPosition.x;
             this.currentY = this.node.spawnPosition.y;

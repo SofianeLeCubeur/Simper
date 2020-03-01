@@ -5,7 +5,7 @@ class Print extends Node {
     constructor(id, name = 'Print', inputs = [], outputs = []){
         super(id, name, inputs, outputs);
         this.addInput(0, 'In', '*');
-        this.setWidth(80);
+        this.setWidth(75);
         this._generator = function(stateInputs, stateOutputs){
             Object.values(stateInputs).forEach((input, i) => {
                 console.log('%c[PrintNode] %c{'+ i +'}->', 'color:aqua', 'color:lightcyan', input);

@@ -12,6 +12,18 @@ class Parse extends Node {
     }
 }
 
+class ToString extends Node {
+    constructor(id, name = 'To String', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', '*');
+        this.addOutput(0, 'Out', 'string');
+        this.setWidth(100);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = String(stateInputs[0]);
+        };
+    }
+}
+
 class Substring extends Node {
     constructor(id, name = 'Substring', inputs = [], outputs = []){
         super(id, name, inputs, outputs);
@@ -34,7 +46,7 @@ class IndexOf extends Node {
         this.addInput(0, 'Str', 'string');
         this.addInput(1, 'Needle', 'string');
         this.addOutput(0, 'Out', 'number');
-        this.setWidth(140);
+        this.setWidth(145);
         this._generator = function(stateInputs, stateOutputs){
             stateOutputs[0] = stateInputs[0].indexOf(stateInputs[1]);
         };
@@ -66,6 +78,7 @@ export default {
         Parse,
         Substring,
         IndexOf,
-        Length
+        Length,
+        ToString
     }
 };

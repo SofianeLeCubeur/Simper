@@ -7,7 +7,19 @@ export class String extends Node {
         this.asInput('string', (inputs) => {
             return inputs[0];
         });
-        this.addInput(0, name === undefined ? 'S' : name, 'string');
+        this.addInput(0, name === undefined || name === 'String Input' ? 'S' : name, 'string');
+    }
+}
+
+export class StringConstant extends Node {
+    constructor(id, name, inputs = [], outputs = []){
+        super(id, name || 'String Input', inputs, outputs);
+        this._inputType = 'text';
+        this._isConstant = true;
+        this.asInput('string', (inputs) => {
+            return inputs[0];
+        });
+        this.addInput(0, name === undefined || name === 'String Input' ? 'S' : name, 'string');
     }
 }
 
@@ -15,6 +27,18 @@ export class Number extends Node {
     constructor(id, name, inputs = [], outputs = []){
         super(id, name || 'Number Input', inputs, outputs);
         this._inputType = 'number';
+        this.asInput('number', (inputs) => {
+            return inputs[0].indexOf('.') != -1 ? parseFloat(inputs[0]) : parseInt(inputs[0]);
+        });
+        this.addInput(0, name === undefined || name === 'Number Input' ? 'X' : name, 'number');
+    }
+}
+
+export class NumberConstant extends Node {
+    constructor(id, name, inputs = [], outputs = []){
+        super(id, name || 'Number Input', inputs, outputs);
+        this._inputType = 'number';
+        this._isConstant = true;
         this.asInput('number', (inputs) => {
             return inputs[0].indexOf('.') != -1 ? parseFloat(inputs[0]) : parseInt(inputs[0]);
         });
@@ -45,7 +69,9 @@ export default {
     nodes: {},
     inputs: {
         String,
+        'String Constant': StringConstant,
         Number,
+        'Number Constant': NumberConstant,
         Boolean
     }
 }

@@ -6,11 +6,11 @@ let types = {
         color: '#ac7cff', assertation: (v) => typeof v === 'boolean'
     },
     'number': {
-        color: '#fd696b', assertation: (v) => typeof v === 'number',
+        color: '#fd696b', assertation: (v) => typeof v === 'number' && !isNaN(v),
     },
     'string': {
         color: '#7dcaff', assertation: (v) => typeof v === 'string',
-    },
+    }
 };
 
 export { types }
@@ -86,9 +86,9 @@ export class Node {
         return this;
     }
 
-    setInput(id, value){
+    setInput(id, value, verbose=false){
         this._inputStates[id] = value;
-        console.log('%c[Node] (' + this._name + ') Setting input #' + id + ' to ' + value, 'background: #222; color: #bada55')
+        if(verbose) console.log('%c[Node] (' + this._name + ') Setting input #' + id + ' to ' + value, 'background: #222; color: #bada55')
     }
 
     setPreview(renderer){
@@ -99,7 +99,7 @@ export class Node {
     hasEnoughInput(){
         let aei = true;
         this.inputs.forEach(input => {
-            if(!this._inputStates[input.id]){
+            if(!types[input.type].assertation(this._inputStates[input.id])){
                 aei = false;
             }
         });
@@ -128,10 +128,14 @@ export class Node {
         this._generator = generator;
     }
 
-    getOutputs(){
+    getInputState(id){
+        return this._inputStates[id];
+    }
+
+    getOutputs(verbose=false){
         let outputs = {};
         this._generator(this._inputStates, outputs);
-        console.log('%c[Node] (' + this._name + ') Generator: ', 'background: #222; color:pink', outputs)
+        if(verbose) console.log('%c[Node] (' + this._name + ') Generator: ', 'background: #222; color:pink', outputs)
         return outputs
     }
 

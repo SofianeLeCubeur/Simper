@@ -84,31 +84,7 @@ export default {
         this.$store.dispatch('add_dictionary', string);
         this.$store.dispatch('update_creating_node', false);
 
-        const rect = this.$el.getBoundingClientRect();
-        const iX = Math.round(rect.width * 0.05), dY = Math.round(rect.height * 0.05);
-
-        const iRef = 'buildpack/' + this.buildpack.name + ':input';
-        this.buildpack.requiredInputNodes.forEach((node_constructor, i) => {
-            if(!this.allNodes[node_constructor]){
-                throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
-            }
-            let node = new this.allNodes[node_constructor](rd());
-            node.setReference(iRef);
-            node.spawnPosition = { x: iX, y: dY + (dY + 5) * i};
-            this.nodes.push(node);
-        });
-
-        const oRef = 'buildpack/' + this.buildpack.name + ':output';
-        const oX = Math.round(rect.width * 0.95);
-        this.buildpack.requiredOutputNodes.forEach((node_constructor, i) => {
-            if(!this.allNodes[node_constructor]){
-                throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
-            }
-            let node = new this.allNodes[node_constructor](rd());
-            node.setReference(oRef);
-            node.spawnPosition = { x: oX - node.width.slice(0,-2), y: dY + (dY + 5) * i};
-            this.nodes.push(node);
-        });
+        this.setupBuildpackBuiltins();
 
         /*let maxWorkspaceZoom = 5;
         let minWorkspaceZoom = 0.3;
@@ -168,7 +144,6 @@ export default {
             }
             else if(payload.type === 'build:run'){
                 this.buildpack.run(this.export(0, 0, true),this.nodes);
-                this.buildpack.reset();
             } 
             else if(payload.type === 'build:mode:run'){
                 this.mode = 'run';
@@ -177,7 +152,6 @@ export default {
             } 
             else if(payload.type === 'build:mode:build'){
                 this.mode = 'build';
-                this.buildpack.reset();
                 this.$store.dispatch('update_creating_node', false);
                 this.$forceUpdate();
             } 
@@ -388,7 +362,7 @@ export default {
             this.$store.dispatch('update_editing', false);
             this.activeLink = -1;
             this.script_name = 'Untitled Script';
-            this.buildpack.reset();
+            this.setupBuildpackBuiltins();
         },
         updateDictionnaries(){
             this.$store.dispatch('update_editing_dictionaries', false);
@@ -418,6 +392,9 @@ export default {
                 }
                 let node = new this.allNodes[rNode['$']](rNode.id, rNode.name);
                 if(rNode.ref) node.setReference(rNode.ref);
+                if(rNode.opts){
+                    node._inputStates = rNode.opts;
+                }
                 if(useRelativeCoords){
                     node.spawnPosition = {x: Math.floor(content.bounds.x + content.bounds.w * rNode.relative_pos.x), 
                         y: Math.floor(content.bounds.y + content.bounds.h * rNode.relative_pos.y) };
@@ -512,6 +489,7 @@ export default {
                         pos: node.spawnPosition,
                         relative_pos: {x: (node.spawnPosition.x - bounds.x) / bounds.w, y: (node.spawnPosition.y - bounds.y) / bounds.h}
                     }
+                    if(node._isConstant) obj.opts = node.getOutputs();
                     if(node.hasReference) obj.ref = node.reference;
                     return obj
                 }),
@@ -578,6 +556,33 @@ export default {
             $box.style.width = (this.bounds.w + 6) + 'px';
             $box.style.height = (this.bounds.h + 6) + 'px';
             $box.style['border-color'] = 'orange';
+        },
+        setupBuildpackBuiltins(){
+            const rect = this.$el.getBoundingClientRect();
+            const iX = Math.round(rect.width * 0.05), dY = Math.round(rect.height * 0.05);
+
+            const iRef = 'buildpack/' + this.buildpack.name + ':input';
+            this.buildpack.requiredInputNodes.forEach((node_constructor, i) => {
+                if(!this.allNodes[node_constructor]){
+                    throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
+                }
+                let node = new this.allNodes[node_constructor](rd());
+                node.setReference(iRef);
+                node.spawnPosition = { x: iX, y: dY + (dY + 5) * i};
+                this.nodes.push(node);
+            });
+
+            const oRef = 'buildpack/' + this.buildpack.name + ':output';
+            const oX = Math.round(rect.width * 0.95);
+            this.buildpack.requiredOutputNodes.forEach((node_constructor, i) => {
+                if(!this.allNodes[node_constructor]){
+                    throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
+                }
+                let node = new this.allNodes[node_constructor](rd());
+                node.setReference(oRef);
+                node.spawnPosition = { x: oX - node.width.slice(0,-2), y: dY + (dY + 5) * i};
+                this.nodes.push(node);
+            });
         }
     },
     computed: {

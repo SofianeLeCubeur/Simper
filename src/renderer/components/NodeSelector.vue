@@ -73,7 +73,7 @@ export default {
             } else if(this.nodeName){
                 Object.keys(this.displayedNodeDict).forEach(category => {
                     const keys = Object.keys(this.nodeDict[category]);
-                    this.displayedNodeDict[category] = keys.filter(k => k.toLowerCase().startsWith(this.nodeName.split(':')[0].toLowerCase()));
+                    this.displayedNodeDict[category] = keys.filter(k => k.toLowerCase().indexOf(this.nodeName.split(':')[0].toLowerCase()) >= 0);
                 });
             }
         },
