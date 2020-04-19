@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="preview" v-if="node._hasPreview">
-            <canvas :ref="'preview'" width="150" height="150"></canvas>
+            <canvas :ref="'preview'"></canvas>
         </div>
     </div>
 </template>
@@ -93,8 +93,11 @@ export default {
         }
         if(this.node._hasPreview){
             const canvas = this.$refs['preview'];
+            canvas.width = this.node.width.replace('px', '') - 2;
+            canvas.height = this.node.width.replace('px', '') - 2;
             const ctx = canvas.getContext('2d');
-            this.node._previewRenderer(ctx, canvas);
+            this.node._preview = canvas;
+            this.$nextTick(() => this.node._previewRenderer(ctx, canvas));
             // TODO
         }
 
@@ -192,6 +195,10 @@ export default {
         outline: none;
         position: absolute;
         opacity: 0.95;
+
+        .preview {
+            display: flex;
+        }
 
         &:hover {
             box-shadow: 0 0 0 1px $hoverBorder;

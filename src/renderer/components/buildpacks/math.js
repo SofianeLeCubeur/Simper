@@ -1,17 +1,61 @@
 import Buildpack from './buildpack'
 
-export default class Simper extends Buildpack {
+function remap(x, inMin, inMax, outMin, outMax) {
+    return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
+export default class MathPlan extends Buildpack {
 
     constructor(){
-        super('Simper', 'v1.0.0');
-        this._requiredDictionaries = ['basic_input', 'misc', 'math', 'string'];
-        this._requiredInputNodes = [];
-        this._requiredOutputNodes = ['Print'];
+        super('MathPlan', 'v0.1.0');
+        this._requiredDictionaries = ['basic_input', 'misc', 'math', 'math_plan'];
+        this._requiredInputNodes = ['X', 'Y'];
+        this._requiredOutputNodes = ['Graph'];
     }
 
     run(script, nodes, verbose=true){
-        this.prepare(script, nodes);
+        this._points = [];
+        this._graph = nodes.filter(node => {
+            return node.reference === 'buildpack/MathPlan:output0'
+        })[0];
+        this._xinput = nodes.filter(node => {
+            return node.reference === 'buildpack/MathPlan:input0'
+        })[0];
+        this._yinput = nodes.filter(node => {
+            return node.reference === 'buildpack/MathPlan:input1'
+        })[0];
 
+        this.nodes = [...nodes];
+        this.links = script.links;
+        
+        let xMin = -5;
+        let yMin = -5;
+        let xMax = 5;
+        let yMax = 5;
+        let points = [];
+
+        for(let x = xMin; x <= xMax; x += 0.01){
+            this._xinput.setGenerator((inputs, stateOutput) => {
+                stateOutput[0] = x
+            });
+
+            this.prepare(script, nodes);
+            this.doRun();
+            const id = this._graph.id;
+            const output = this.outputs[id];
+            let y = output[0].y;
+
+            let normalizedX = 1-remap(x, xMin, xMax, 0, 1);
+            let normalizedY = 1-remap(y, yMin, yMax, 0, 1);
+            points.push({x: normalizedX, y: normalizedY});
+        }
+
+        const ctx = this._graph._preview.getContext('2d');
+        console.log('Rendering ' + points.length + ' points');
+        this._graph._renderPoints(ctx, this._graph._preview, points);
+    }
+
+    doRun(verbose=false){
         while(Object.keys(this.nextNodes).length > 0){
             // Main loop
             if(verbose) console.printLog({content: '%c├────%c Call Trace #' + this._run + ' %c────┤', $style: ['color:tomato', 'background:tomato;color:white', 'color:tomato'],tag:'Debug'});
@@ -36,8 +80,6 @@ export default class Simper extends Buildpack {
     }
 
     prepare(script, nodes){
-        this.nodes = [...nodes];
-        this.links = script.links;
         this.nextNodes = {};
         this.outputs = {};
         this._run = 0;

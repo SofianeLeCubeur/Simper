@@ -29,6 +29,7 @@
 
         <DictionariesDialog @close="updateDictionnaries"></DictionariesDialog>
         <Console :visible="console_visible" @expand="console_visible = true" @reduce="console_visible = false"></Console>
+        <RunWithDialog :visible="showRunProfiles" @close="closeProfiles"></RunWithDialog>
 
         <div class="border" v-if="showDebugBounds">
             <div class="label" v-if="nodes.length > 0" @click.stop>{{ script_name }}</div>
@@ -42,6 +43,7 @@ import NodeRenderer from './NodeRenderer'
 import Dialog from './Dialog'
 import Link from './Link'
 import DictionariesDialog from './dialogs/DictionariesDialog'
+import RunWithDialog from './dialogs/RunWithDialog'
 import NodeSelector from './NodeSelector'
 import Console from './Console'
 
@@ -53,6 +55,27 @@ import input from './nodes/input'
 import math from './nodes/math'
 import misc from './nodes/misc'
 import string from './nodes/string'
+import arduino from './nodes/arduino'
+import MathPlan from './nodes/math_plan'
+
+const dictionaries = {
+    'basic_input': input,
+    'misc': misc,
+    'math': math,
+    'string': string,
+    'arduino': arduino,
+    'math_plan': MathPlan
+};
+
+import Arduino from './buildpacks/arduino'
+import Simper from './buildpacks/simper'
+import mathplan from './buildpacks/math'
+
+const buildpacks = {
+    'Arduino': Arduino,
+    'Simper': Simper,
+    'MathPlan': mathplan
+};
 
 const { dialog } = remote;
 const fs = require('fs');
@@ -61,7 +84,7 @@ const os = require('os');
 let rd = () => Math.random();
 
 export default {
-    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console },
+    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console, RunWithDialog },
     data(){
         return {
             script_name: 'Untitled Script',
@@ -79,13 +102,12 @@ export default {
         }
     },
     mounted(){
-        this.$store.dispatch('add_dictionary', input);
-        this.$store.dispatch('add_dictionary', input);
-        this.$store.dispatch('add_dictionary', math);
-        this.$store.dispatch('add_dictionary', misc);
-        this.$store.dispatch('add_dictionary', string);
+        this.buildpack.requiredDictionaries.forEach(id => {
+            if(dictionaries[id]){
+                this.$store.dispatch('add_dictionary', dictionaries[id]);
+            }
+        });
         this.$store.dispatch('update_creating_node', false);
-
         this.setupBuildpackBuiltins();
 
         /*let maxWorkspaceZoom = 5;
@@ -155,7 +177,10 @@ export default {
                 this.mode = 'run';
                 this.$store.dispatch('update_creating_node', false);
                 this.$forceUpdate();
-            } 
+            }
+            else if(payload.type === 'build:run_with'){
+                this.$store.dispatch('update_show_run_profiles', true);
+            }
             else if(payload.type === 'build:mode:build'){
                 this.mode = 'build';
                 this.$store.dispatch('update_creating_node', false);
@@ -379,6 +404,16 @@ export default {
             let rawNodes = content.nodes;
             let rawLinks = content.links;
             let useRelativeCoords = !!content.bounds;
+            let buildpackName = content.buildpacks[0];
+            let buildpack = new buildpacks[buildpackName]();
+            this.$store.dispatch('update_buildpack', buildpack);
+            this.buildpack.requiredDictionaries.forEach(id => {
+                if(dictionaries[id]){
+                    this.$store.dispatch('add_dictionary', dictionaries[id]);
+                }
+            });
+            this.$store.dispatch('update_creating_node', false);
+            this.setupBuildpackBuiltins();
 
             if(this.showDebugBounds) this.$el.querySelector('.border').style.outline = null;
             this.script_name = content.name;
@@ -573,7 +608,7 @@ export default {
                     throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
                 }
                 let node = new this.allNodes[node_constructor](rd());
-                node.setReference(iRef);
+                node.setReference(iRef+i);
                 node.spawnPosition = { x: iX, y: dY + (dY + 5) * i};
                 this.nodes.push(node);
             });
@@ -585,10 +620,13 @@ export default {
                     throw new Error('Unable to import an unregistred node: ' + node_constructor + ' (Missing dictionary?)');
                 }
                 let node = new this.allNodes[node_constructor](rd());
-                node.setReference(oRef);
+                node.setReference(oRef+i);
                 node.spawnPosition = { x: oX - node.width.slice(0,-2), y: dY + (dY + 5) * i};
                 this.nodes.push(node);
             });
+        },
+        closeProfiles(){
+            this.$store.dispatch('update_show_run_profiles', false);
         }
     },
     computed: {
@@ -602,7 +640,7 @@ export default {
             Object.keys(this.nodeDict).forEach(category => n = {...n, ...this.nodeDict[category]});
             return n;
         },
-        ...mapGetters([ 'nodeManager', 'nodeDict', 'creatingNode', 'editing', 'buildpack', 'showDebugBounds' ])
+        ...mapGetters([ 'nodeManager', 'nodeDict', 'creatingNode', 'editing', 'buildpack', 'showDebugBounds', 'showRunProfiles' ])
     }
 }
 </script>

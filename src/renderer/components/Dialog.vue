@@ -59,5 +59,13 @@ export default {
                 text-align: center;
             }
         }
+
+        .footer {
+            margin: 5px;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: flex-end;
+        }
     }
 </style>

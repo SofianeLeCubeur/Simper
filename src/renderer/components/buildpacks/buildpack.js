@@ -21,6 +21,10 @@ export default class Buildpack {
         return this._name;
     }
 
+    get requiredDictionaries(){
+        return this._requiredDictionaries;
+    }
+
     get version(){
         return this._version;
     }

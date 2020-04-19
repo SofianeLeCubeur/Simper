@@ -114,6 +114,19 @@ class Cosine extends Node {
     }
 }
 
+class Tan extends Node {
+    
+    constructor(id, name = 'Tan', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'A', 'number', '#fd696b');
+        this.addOutput(0, 'Out', 'number', '#ffd686');
+        this.setWidth(110);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.tan(stateInputs[0]);
+        };
+    }
+}
+
 class ArcSine extends Node {
     
     constructor(id, name = 'ArcSine', inputs = [], outputs = []){
@@ -136,6 +149,19 @@ class ArcCosine extends Node {
         this.setWidth(110);
         this._generator = function(stateInputs, stateOutputs){
             stateOutputs[0] = Math.acos(stateInputs[0]);
+        };
+    }
+}
+
+class ArcTan extends Node {
+    
+    constructor(id, name = 'ArcTan', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'A', 'number', '#fd696b');
+        this.addOutput(0, 'Out', 'number', '#ffd686');
+        this.setWidth(110);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.atan(stateInputs[0]);
         };
     }
 }
@@ -304,6 +330,32 @@ class Ceil extends Node {
         this.setWidth(100);
         this._generator = function(stateInputs, stateOutputs){
             stateOutputs[0] = Math.ceil(stateInputs[0]);
+        };
+    }
+}
+
+class Log extends Node {
+    
+    constructor(id, name = 'Log', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'number');
+        this.addOutput(0, 'Out', 'number');
+        this.setWidth(100);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.log(stateInputs[0]);
+        };
+    }
+}
+
+class Exp extends Node {
+    
+    constructor(id, name = 'Exp', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'number');
+        this.addOutput(0, 'Out', 'number');
+        this.setWidth(100);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.exp(stateInputs[0]);
         };
     }
 }
@@ -687,14 +739,18 @@ export default {
         Multiply2,
         Multiply3,
         Power,
+        Log,
+        Exp,
         Divide,
         Modulo,
         Sqrt,
-        
+    
         Sine,
         Cosine,
+        Tan,
         ArcSine,
         ArcCosine,
+        ArcTan,
         DegToRad,
         RadToDeg,
 
