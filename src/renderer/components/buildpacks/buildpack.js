@@ -12,6 +12,7 @@ export default class Buildpack {
         this._allowVariables = true;
         this._allowVariableImportation = true;
         this._runtimeSettings = {};
+        this._requiredBlocks = [];
     }
 
     run(script){

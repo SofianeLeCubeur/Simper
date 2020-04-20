@@ -722,7 +722,7 @@ export default {
         },
         'vector4': {
             color: '#2ecc96', 
-            assertation: (vec) => vec !== undefined && validNumber(vec.x) && validNumber(vec.y) && validNumber(vec.z) && vvalidNumber(vec.w)
+            assertation: (vec) => vec !== undefined && validNumber(vec.x) && validNumber(vec.y) && validNumber(vec.z) && validNumber(vec.w)
         }
     },
     nodes: {

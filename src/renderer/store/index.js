@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Simper from './../components/buildpacks/simper'
 import MathPlan from './../components/buildpacks/math'
+import Arduino from './../components/buildpacks/arduino'
 import { createPersistedState, createSharedMutations } from 'vuex-electron'
 //import modules from './modules'
 import NodeManager from './../components/nodes'
@@ -10,7 +11,7 @@ Vue.use(Vuex)
 
 const state = {
     // States
-    buildpack: new MathPlan(),
+    buildpack: new Arduino(),
     editing: false,
     creatingNode: true,
     editingDictionaries: false,
@@ -68,6 +69,10 @@ const actions = {
 		dict.addDictionary(dictionary);
 		context.state.nodeManager = dict;
     },
+    reset_dictionnaries(context){
+        let dict = context.state.nodeManager;
+		dict.clear();
+    },
     set_bounds_debuging(context, show_debug_bounds){
         context.commit('set_debug_bounds', show_debug_bounds);
     }
@@ -78,5 +83,5 @@ export default new Vuex.Store({
     getters,
     mutations,
     actions,
-  	strict: process.env.NODE_ENV !== 'production'
+  	strict: false
 })

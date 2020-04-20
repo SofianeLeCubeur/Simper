@@ -27,27 +27,57 @@ export default class MathPlan extends Buildpack {
 
         this.nodes = [...nodes];
         this.links = script.links;
+        this.prepare(script, nodes);
+        this.doRun();
+        const id = this._graph.id;
+        let output = this.outputs[id];
         
-        let xMin = -5;
-        let yMin = -5;
-        let xMax = 5;
-        let yMax = 5;
+        let xMin = -10;
+        let yMin = -10;
+        let xMax = 10;
+        let yMax = 10;
+        let step = 0.01;
+        if(output && output[0]){
+            output = output[0];
+            console.log(output);
+            if(output.xMin !== undefined){
+                xMin = output.xMin;
+            }
+            if(output.yMin !== undefined){
+                yMin = output.yMin;
+            }
+            if(output.xMax !== undefined){
+                xMax = output.xMax;
+            }
+            if(output.yMax !== undefined){
+                yMax = output.yMax;
+            }
+            if(output.step !== undefined){
+                step = output.step;
+            }
+        }
         let points = [];
 
-        for(let x = xMin; x <= xMax; x += 0.01){
+        for(let x = xMin; x <= xMax; x += step){
             this._xinput.setGenerator((inputs, stateOutput) => {
                 stateOutput[0] = x
             });
 
             this.prepare(script, nodes);
             this.doRun();
-            const id = this._graph.id;
-            const output = this.outputs[id];
-            let y = output[0].y;
-
-            let normalizedX = 1-remap(x, xMin, xMax, 0, 1);
-            let normalizedY = 1-remap(y, yMin, yMax, 0, 1);
-            points.push({x: normalizedX, y: normalizedY});
+            let pX = x;
+            output = this.outputs[id];
+            if(output && output[0]){
+                output = output[0];
+                if(output.x !== undefined){
+                    pX = x;
+                }
+                let y = output.y;
+        
+                let normalizedX = remap(pX, xMin, xMax, 0, 1);
+                let normalizedY = 1-remap(y, yMin, yMax, 0, 1);
+                points.push({x: normalizedX, y: normalizedY});
+            }
         }
 
         const ctx = this._graph._preview.getContext('2d');

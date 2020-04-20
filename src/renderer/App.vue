@@ -8,7 +8,7 @@
 const customTitlebar = require('custom-electron-titlebar');
 
   export default {
-    name: 'diamaths',
+    name: 'Simper',
     mounted(){/*
       new customTitlebar.Titlebar({
         backgroundColor: customTitlebar.Color.fromHex('#333333')

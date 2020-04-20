@@ -59,10 +59,12 @@ class Graph extends Node {
         this.addInput(3, 'Y Min', 'number');
         this.addInput(4, 'X Max', 'number');
         this.addInput(5, 'Y Max', 'number');
-        //this.addInput(6, 'Step', 'number');
-        this.setWidth(175);
+        this.addInput(6, 'Step', 'number');
+        this.setWidth(200);
         this._generator = function(stateInputs, stateOutputs){
-            stateOutputs[0] = {x: stateInputs[0], y: stateInputs[1], xMin: stateInputs[2], yMin: stateInputs[3], xMax: stateInputs[4], yMax: stateInputs[5]};
+            stateOutputs[0] = {x: stateInputs[0], y: stateInputs[1], 
+                xMin: stateInputs[2], yMin: stateInputs[3], xMax: stateInputs[4], yMax: stateInputs[5],
+                step: stateInputs[6]};
         };
         this.setPreview((ctx, canvas) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);

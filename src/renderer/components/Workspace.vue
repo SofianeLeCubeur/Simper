@@ -34,6 +34,8 @@
         <div class="border" v-if="showDebugBounds">
             <div class="label" v-if="nodes.length > 0" @click.stop>{{ script_name }}</div>
         </div>
+
+        <Block v-for="block in blocks" :block="block" :key="block.name"></Block>
   </div>
 </template>
 
@@ -46,6 +48,7 @@ import DictionariesDialog from './dialogs/DictionariesDialog'
 import RunWithDialog from './dialogs/RunWithDialog'
 import NodeSelector from './NodeSelector'
 import Console from './Console'
+import Block from './Block'
 
 import { dragscroll } from 'vue-dragscroll'
 import { ipcRenderer, remote } from 'electron'
@@ -84,7 +87,7 @@ const os = require('os');
 let rd = () => Math.random();
 
 export default {
-    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console, RunWithDialog },
+    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console, RunWithDialog, Block },
     data(){
         return {
             script_name: 'Untitled Script',
@@ -98,15 +101,11 @@ export default {
             spawnPoint: {},
             mode: 'build',
             bounds: {},
-            console_visible: false
+            console_visible: false,
+            blocks: []
         }
     },
     mounted(){
-        this.buildpack.requiredDictionaries.forEach(id => {
-            if(dictionaries[id]){
-                this.$store.dispatch('add_dictionary', dictionaries[id]);
-            }
-        });
         this.$store.dispatch('update_creating_node', false);
         this.setupBuildpackBuiltins();
 
@@ -380,7 +379,7 @@ export default {
             }
             this.$delete(this.nodes, index);
         },
-        resetState(){
+        resetState(setup=true){
             if(this.showDebugBounds){
                 this.$el.querySelector('.border').style['border-color'] = null;
             }
@@ -393,14 +392,15 @@ export default {
             this.$store.dispatch('update_editing', false);
             this.activeLink = -1;
             this.script_name = 'Untitled Script';
-            this.setupBuildpackBuiltins();
+            this.blocks = [];
+            if(setup) this.setupBuildpackBuiltins();
         },
         updateDictionnaries(){
             this.$store.dispatch('update_editing_dictionaries', false);
         },
         // IO Functions
         import(content){
-            this.resetState();
+            this.resetState(false);
             let rawNodes = content.nodes;
             let rawLinks = content.links;
             let useRelativeCoords = !!content.bounds;
@@ -446,8 +446,6 @@ export default {
                 return node;
             });
             
-            // TODO: Use script's buildpack to import dictionaries
-
             this.$nextTick(() => {
                 rawLinks.forEach(rLink => {
                     let from = this.nodes.filter(n => n.id == rLink.from.nid)[0];
@@ -602,6 +600,17 @@ export default {
             const rect = this.$el.getBoundingClientRect();
             const iX = Math.round(rect.width * 0.05), dY = Math.round(rect.height * 0.05);
 
+            this.$store.dispatch('reset_dictionnaries');
+            this.buildpack.requiredDictionaries.forEach(id => {
+                if(dictionaries[id]){
+                    this.$store.dispatch('add_dictionary', dictionaries[id]);
+                }
+            });
+
+            this.buildpack._requiredBlocks.forEach((block, i) => {
+                this.blocks.push({name: block, color: 'orange', x: 200 + i * 100, y: 200});
+            });
+            
             const iRef = 'buildpack/' + this.buildpack.name + ':input';
             this.buildpack.requiredInputNodes.forEach((node_constructor, i) => {
                 if(!this.allNodes[node_constructor]){
