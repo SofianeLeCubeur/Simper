@@ -20,7 +20,7 @@
     "postinstall": ""
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "custom-electron-titlebar": "^3.2.2-hotfix62",
     "vue": "^2.5.16",
     "vue-dragscroll": "^2.0.1",

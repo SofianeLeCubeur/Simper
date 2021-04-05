@@ -30,6 +30,7 @@
         <DictionariesDialog @close="updateDictionnaries"></DictionariesDialog>
         <Console :visible="console_visible" @expand="console_visible = true" @reduce="console_visible = false"></Console>
         <RunWithDialog :visible="showRunProfiles" @close="closeProfiles"></RunWithDialog>
+        <BuildpackDialog @create="resetState" @close="closeBuildpacks" @done="createScript"></BuildpackDialog>
 
         <div class="border" v-if="showDebugBounds">
             <div class="label" v-if="nodes.length > 0" @click.stop>{{ script_name }}</div>
@@ -46,6 +47,7 @@ import Dialog from './Dialog'
 import Link from './Link'
 import DictionariesDialog from './dialogs/DictionariesDialog'
 import RunWithDialog from './dialogs/RunWithDialog'
+import BuildpackDialog from './dialogs/BuildpackDialog'
 import NodeSelector from './NodeSelector'
 import Console from './Console'
 import Block from './Block'
@@ -75,9 +77,9 @@ import Simper from './buildpacks/simper'
 import mathplan from './buildpacks/math'
 
 const buildpacks = {
-    'Arduino': Arduino,
     'Simper': Simper,
-    'MathPlan': mathplan
+    'MathPlan': mathplan,
+    'Arduino': Arduino
 };
 
 const { dialog } = remote;
@@ -87,7 +89,7 @@ const os = require('os');
 let rd = () => Math.random();
 
 export default {
-    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console, RunWithDialog, Block },
+    components: { NodeRenderer, Link, Dialog, DictionariesDialog, NodeSelector, Console, RunWithDialog, Block, BuildpackDialog },
     data(){
         return {
             script_name: 'Untitled Script',
@@ -107,7 +109,8 @@ export default {
     },
     mounted(){
         this.$store.dispatch('update_creating_node', false);
-        this.setupBuildpackBuiltins();
+        this.$store.commit('set_dictionnaries', dictionaries);
+        this.$store.commit('set_buildpacks', buildpacks);
 
         /*let maxWorkspaceZoom = 5;
         let minWorkspaceZoom = 0.3;
@@ -169,7 +172,7 @@ export default {
                 const style = 'background-color:rgba(0,0,0,.2);padding:5px;color:#f5f5f5;max-width:100%;width:100%;';
                 let start = Date.now();
                 console.printLog({content: '%cScript Running...', $style: [style]});
-                this.buildpack.run(this.export(0, 0, true),this.nodes);
+                this.buildpack.run(this.export(0, 0, true), this.nodes);
                 console.printLog({content: '%cScript was ran in ' + (Date.now() - start) / 1000 + 's', $style: [style]});
             } 
             else if(payload.type === 'build:mode:run'){
@@ -189,7 +192,10 @@ export default {
                 this.resetState();
             } 
             else if(payload.type === 'edit:dictionnaries'){
-                this.$store.dispatch('update_editing_dictionaries', true);
+                this.$store.commit('set_editing_dictionaries', true);
+            } 
+            else if(payload.type === 'edit:buildpacks'){
+                this.$store.commit('set_show_buildpacks', true);
             } 
             else if(payload.type === 'edit:fix_links'){
                 this.nodes.forEach(node => this.onUpdate({node}));
@@ -255,6 +261,30 @@ export default {
                 this.links[this.activeLink] = t;
                 this.$forceUpdate();
                 this.pass = false;
+            }
+        },
+        createScript(e){
+            const name = e.selectedBuildpack.name;
+            if(name === 'import'){
+                let fileName = dialog.showOpenDialogSync({ title: 'Open', properties: ['openFile'] });
+                if(fileName != undefined){
+                    let path = fileName[0];
+                    if(path !== undefined){
+                        if(fs.existsSync(path)){
+                            let content = fs.readFileSync(path, 'utf8');
+                            try {
+                                this.import(JSON.parse(content));
+                            } catch(e){
+                                alert('Error: The selected file cannot be read.');
+                                console.error('Unable to read the file', e);
+                            }
+                        }
+                    }
+                }
+            } else {
+                this.$store.commit('set_buildpack', new buildpacks[name]);
+                this.$store.commit('set_show_buildpacks', false);
+                this.resetState();
             }
         },
         edit(e, connectToOutput){
@@ -390,13 +420,14 @@ export default {
             this.mode = 'build';
             this.$store.dispatch('update_creating_node', false);
             this.$store.dispatch('update_editing', false);
+            this.$store.commit('set_show_buildpacks', false);
             this.activeLink = -1;
             this.script_name = 'Untitled Script';
             this.blocks = [];
             if(setup) this.setupBuildpackBuiltins();
         },
         updateDictionnaries(){
-            this.$store.dispatch('update_editing_dictionaries', false);
+            this.$store.commit('set_editing_dictionaries', false);
         },
         // IO Functions
         import(content){
@@ -636,6 +667,9 @@ export default {
         },
         closeProfiles(){
             this.$store.dispatch('update_show_run_profiles', false);
+        },
+        closeBuildpacks(){
+            this.$store.commit('set_show_buildpacks', false);
         }
     },
     computed: {
@@ -664,7 +698,7 @@ export default {
 
         .button {
             padding: 10px 20px;
-            border: 1px solid #131313;
+            border: none;
             color: #d6d6d6;
             background: #424242;
             border-radius: 4px;
@@ -734,41 +768,6 @@ export default {
             }
         }
 
-        ul.list {
-            list-style: none;
-            display: flex;
-            flex-flow: column nowrap;
-            margin-bottom: 15px;
-
-            li.item {
-                display: flex;
-                flex-flow: row nowrap;
-                align-items: center;
-                cursor: pointer;
-                color: #e6e6e6;
-                padding: 3px;
-
-                .icon {
-                    padding: 5px;
-                    height: 34px;
-                    width: 34px;
-                    color: #f5f5f5;
-                }
-
-                p {
-                    color: #bebebe;
-                    font-size: 14px;
-                }
-
-                &:not(:last-child){
-                    border-bottom: none;
-                }
-
-                &:hover {
-                    background: #575757;
-                }
-            }
-        }
 
         .border {
             position: absolute;

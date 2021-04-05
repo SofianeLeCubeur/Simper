@@ -1,11 +1,11 @@
 <template>
   <div class="dialog" :class="{visible: visible}" @click.stop>
       <div class="body">
-            <div class="close" @click="$emit('close')">
+            <!--<div class="close" @click="$emit('close')">
                 <svg style="width:24px;height:24px" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z" />
                 </svg>
-            </div>
+            </div>-->
             <div class="main">
                 <slot name="body"></slot>
             </div>
@@ -40,32 +40,41 @@ export default {
         }
 
         .body {
-            padding: 15px 20px;
             background: #424242;
             color: #ffffff;
             box-shadow: 0 0 8px 2px rgba(0,0,0,.2);
             position: relative;
-            border-radius: 3px;
+            border-radius: 8px;
 
             .close {
                 position: absolute;
-                top: 5px;
-                right: 5px;
+                top: 12px;
+                right: 12px;
                 cursor: pointer;
+                opacity: 0.75;
+                transition: opacity .3s;
+
+                &:hover {
+                    opacity: 1;
+                }
             }
 
             h3 {
-                padding: 5px 0 10px 0;
-                text-align: center;
+                font-size: 18px;
             }
         }
 
+        .main {
+            padding: 15px 20px;
+        }
+
         .footer {
-            margin: 5px;
+            padding: 8px;
             display: flex;
             flex-flow: row nowrap;
             align-items: center;
             justify-content: flex-end;
+            background: rgba(0,0,0,.15);
         }
     }
 </style>

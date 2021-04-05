@@ -43,6 +43,10 @@ export default class NodeManager {
         }
     }
 
+    hasDictionnary(dictionnary){
+        return !!this._dictionnaries[dictionnary.name];
+    }
+
     list(){
         return {...this._dictionnaries};
     }
@@ -73,6 +77,10 @@ export default class NodeManager {
 
     get nodes(){
         return this._nodes;
+    }
+
+    get dictionnaries(){
+        return Object.values(this._dictionnaries);
     }
 
 }

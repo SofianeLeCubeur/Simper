@@ -1,8 +1,7 @@
 export default class Buildpack {
 
-    constructor(name, version){
+    constructor(name){
         this._name = name;
-        this._version = version;
         this._requiredDictionaries = [];
         this._requiredInputNodes = [];
         this._requiredOutputNodes = [];
@@ -24,10 +23,6 @@ export default class Buildpack {
 
     get requiredDictionaries(){
         return this._requiredDictionaries;
-    }
-
-    get version(){
-        return this._version;
     }
 
     get requiredInputNodes(){

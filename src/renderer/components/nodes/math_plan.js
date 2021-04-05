@@ -29,9 +29,7 @@ class X extends Node {
         super(id, name, inputs, outputs);
         this.addInput(0, 'Input X', 'number');
         this.setWidth(86);
-        this.asInput('number', (stateInputs, stateOutputs) => {
-            return -1;
-        }, 'coord');
+        this.asInput('number', (stateInputs, stateOutputs) => -1, 'coord');
         this._inputType = 'disabled';
     }
 }
@@ -42,9 +40,7 @@ class Y extends Node {
         super(id, name, inputs, outputs);
         this.addInput(0, 'Input Y', 'number');
         this.setWidth(86);
-        this.asInput('number', (stateInputs, stateOutputs) => {
-            return -1;
-        }, 'coord');
+        this.asInput('number', (stateInputs, stateOutputs) => -1, 'coord');
         this._inputType = 'disabled';
     }
 }
@@ -60,7 +56,7 @@ class Graph extends Node {
         this.addInput(4, 'X Max', 'number');
         this.addInput(5, 'Y Max', 'number');
         this.addInput(6, 'Step', 'number');
-        this.setWidth(200);
+        this.setWidth(300);
         this._generator = function(stateInputs, stateOutputs){
             stateOutputs[0] = {x: stateInputs[0], y: stateInputs[1], 
                 xMin: stateInputs[2], yMin: stateInputs[3], xMax: stateInputs[4], yMax: stateInputs[5],
@@ -80,6 +76,7 @@ class Graph extends Node {
             drawLines(ctx, canvas, '#e6e6e6', 10);
             drawLines(ctx, canvas, '#a3a3a3', 2);
             ctx.fillStyle = '#ff5f54';
+            ctx.strokeStyle = '#ff5f54';
             ctx.lineWidth = 2;
             let lastPoint;
             const width = canvas.width, height = canvas.height;
@@ -88,16 +85,16 @@ class Graph extends Node {
                     lastPoint = {x, y};
                     return;
                 }
-                /*ctx.beginPath();
+                ctx.beginPath();
                 ctx.moveTo(lastPoint.x * width, lastPoint.y * height);
                 ctx.lineTo(x * width, y * height);
                 lastPoint.x = x;
                 lastPoint.y = y;
-                ctx.stroke();*/
+                ctx.stroke();
                 // Previously
-                ctx.beginPath();
+                /*ctx.beginPath();
                 ctx.arc(x * width, y * height, 1, 0, Math.PI * 2, true);
-                ctx.fill();
+                ctx.fill();*/
             });
         }
     }

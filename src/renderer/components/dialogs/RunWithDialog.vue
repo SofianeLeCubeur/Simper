@@ -1,6 +1,6 @@
 <template>
     <Dialog :visible="visible" @close="$emit('close')" class="run_with">
-        <div slot="body">
+        <div slot="body" v-if="!!buildpack">
             <div class="header">
                 <h2>Run with...</h2>
                 <p>Using <strong>{{ `${buildpack._name}@${buildpack._version}` }}</strong> as buildpack</p>

@@ -334,6 +334,69 @@ class Ceil extends Node {
     }
 }
 
+class Clamp extends Node {
+
+    constructor(id, name = 'Clamp', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'number');
+        this.addInput(1, 'Min', 'number');
+        this.addInput(2, 'Max', 'number');
+        this.addOutput(0, 'Out', 'number');
+        this.setWidth(130);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0]));
+        };
+    }
+}
+
+class Clamp2 extends Node {
+
+    constructor(id, name = 'Clamp', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'vector2');
+        this.addInput(1, 'Min', 'number');
+        this.addInput(2, 'Max', 'number');
+        this.addOutput(0, 'Out', 'vector2');
+        this.setWidth(130);
+        this._generator = function(stateInputs, stateOutputs){
+            let x = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0].x));
+            let y = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0].y));
+            stateOutputs[0] = { x, y };
+        };
+    }
+}
+
+class Clamp3 extends Node {
+
+    constructor(id, name = 'Clamp', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'vector3');
+        this.addInput(1, 'Min', 'number');
+        this.addInput(2, 'Max', 'number');
+        this.addOutput(0, 'Out', 'vector3');
+        this.setWidth(130);
+        this._generator = function(stateInputs, stateOutputs){
+            let x = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0].x));
+            let y = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0].y));
+            let z = Math.max(stateInputs[1], Math.min(stateInputs[2], stateInputs[0].z));
+            stateOutputs[0] = { x, y, z };
+        };
+    }
+}
+
+class Ln extends Node {
+    
+    constructor(id, name = 'Ln', inputs = [], outputs = []){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'X', 'number');
+        this.addOutput(0, 'Out', 'number');
+        this.setWidth(100);
+        this._generator = function(stateInputs, stateOutputs){
+            stateOutputs[0] = Math.log(stateInputs[0]);
+        };
+    }
+}
+
 class Log extends Node {
     
     constructor(id, name = 'Log', inputs = [], outputs = []){
@@ -342,7 +405,7 @@ class Log extends Node {
         this.addOutput(0, 'Out', 'number');
         this.setWidth(100);
         this._generator = function(stateInputs, stateOutputs){
-            stateOutputs[0] = Math.log(stateInputs[0]);
+            stateOutputs[0] = Math.log10(stateInputs[0]);
         };
     }
 }
@@ -359,6 +422,7 @@ class Exp extends Node {
         };
     }
 }
+
 
 class DotProduct2 extends Node {
     
@@ -601,6 +665,56 @@ class Merge4 extends Node {
     }
 }
 
+class LengthSquared2 extends Node {
+
+    constructor(id, name = 'LengthSquared', inputs=[], outputs=[]){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'V (2)', 'vector2');
+        this.addOutput(0, 'Out', 'number');
+        this._generator = (stateInputs, stateOutputs) => {
+            stateOutputs[0] = stateInputs[0].x * stateInputs[0].x + stateInputs[0].y * stateInputs[0].y;
+        };
+    }
+}
+
+class LengthSquared3 extends Node {
+
+    constructor(id, name = 'LengthSquared', inputs=[], outputs=[]){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'V (3)', 'vector3');
+        this.addOutput(0, 'Out', 'number');
+        this._generator = (stateInputs, stateOutputs) => {
+            stateOutputs[0] = stateInputs[0].x * stateInputs[0].x + stateInputs[0].y * stateInputs[0].y + stateInputs[0].z * stateInputs[0].z;
+        };
+    }
+}
+
+class Normalize2 extends Node {
+
+    constructor(id, name = 'Normalize', inputs=[], outputs=[]){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'V (2)', 'vector2');
+        this.addOutput(0, 'Out', 'vector2');
+        this._generator = (stateInputs, stateOutputs) => {
+            let len = Math.sqrt(stateInputs[0].x * stateInputs[0].x + stateInputs[0].y * stateInputs[0].y);
+            stateOutputs[0] = { x: stateInputs[0].x / len, y: stateInputs[0].y / len };
+        };
+    }
+}
+
+class Normalize3 extends Node {
+
+    constructor(id, name = 'Normalize', inputs=[], outputs=[]){
+        super(id, name, inputs, outputs);
+        this.addInput(0, 'V (3)', 'vector3');
+        this.addOutput(0, 'Out', 'vector3');
+        this._generator = (stateInputs, stateOutputs) => {
+            let len = Math.sqrt(stateInputs[0].x * stateInputs[0].x + stateInputs[0].y * stateInputs[0].y + stateInputs[0].z * stateInputs[0].z);
+            stateOutputs[0] = { x: stateInputs[0].x / len, y: stateInputs[0].y / len, z: stateInputs[0].z / len };
+        };
+    }
+}
+
 // Tests
 
 class Equals extends Node {
@@ -739,6 +853,7 @@ export default {
         Multiply2,
         Multiply3,
         Power,
+        Ln,
         Log,
         Exp,
         Divide,
@@ -764,11 +879,18 @@ export default {
         Round,
         Floor,
         Ceil,
+        Clamp,
+        Clamp2,
+        Clamp3,
 
         DotProduct2,
         DotProduct3,
         Distance2,
         Distance3,
+        LengthSquared2,
+        LengthSquared3,
+        Normalize2,
+        Normalize3,
 
         Split2,
         Split3,

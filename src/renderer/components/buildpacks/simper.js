@@ -2,8 +2,12 @@ import Buildpack from './buildpack'
 
 export default class Simper extends Buildpack {
 
+    static buildpackVersion = 'v1.0.0';
+    static buildpackColor = '#ffa50029';
+    static buildpackAccentColor = 'orange';
+
     constructor(){
-        super('Simper', 'v1.0.0');
+        super('Simper');
         this._requiredDictionaries = ['basic_input', 'misc', 'math', 'string'];
         this._requiredInputNodes = [];
         this._requiredOutputNodes = ['Print'];

@@ -1,4 +1,5 @@
-import { app, BrowserWindow, Menu, ipcMain } from 'electron'
+const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+
 
 /**
  * Set `__static` path to static files in production
@@ -39,6 +40,10 @@ function createWindow() {
             label: 'File',
             submenu: [
                 {
+                    label: 'New Project',
+                    click: getEventListener('edit:buildpack')
+                },
+                {
                     label: 'Open File...',
                     click: getEventListener('file:open')
                 },
@@ -76,10 +81,6 @@ function createWindow() {
                 {
                     label: 'Manage dictionnaries...',
                     click: getEventListener('edit:dictionnaries')
-                },
-                {
-                    label: 'Manage buildpacks...',
-                    click: getEventListener('edit:buildpacks')
                 },
                 { type: 'separator' },
                 {
@@ -121,11 +122,6 @@ function createWindow() {
                 {
                     label: 'Run with...',
                     click: getEventListener('build:run_with')
-                },
-                { type: 'separator' },
-                {
-                    label: 'Compile with...',
-                    click: getEventListener('build:compile')
                 }
             ]
         },

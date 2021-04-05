@@ -1,8 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import Simper from './../components/buildpacks/simper'
-import MathPlan from './../components/buildpacks/math'
-import Arduino from './../components/buildpacks/arduino'
 import { createPersistedState, createSharedMutations } from 'vuex-electron'
 //import modules from './modules'
 import NodeManager from './../components/nodes'
@@ -11,7 +8,9 @@ Vue.use(Vuex)
 
 const state = {
     // States
-    buildpack: new Arduino(),
+    buildpack: null,
+    availableDictionnaries: {},
+    availableBuildpacks: {},
     editing: false,
     creatingNode: true,
     editingDictionaries: false,
@@ -19,11 +18,14 @@ const state = {
     selectorPos: {x: 0, y: 0},
     nodeManager: new NodeManager(),
     show_debug_bounds: false,
-    show_run_profiles: false
+    show_run_profiles: false,
+    show_buildpacks: true
 }
 
 const getters = {
     buildpack: (state) => state.buildpack,
+    buildpacks: (state) => state.availableBuildpacks,
+    dictionnaries: (state) => state.availableDictionnaries,
     nodeManager: (state) => state.nodeManager,
     nodeDict: (state) => state.nodeManager.nodes,
     selectorPos: (state) => state.selectorPos,
@@ -32,7 +34,8 @@ const getters = {
     creatingNode: (state) => state.creatingNode,
     editingDictionaries: (state) => state.editingDictionaries,
     showDebugBounds: (state) => state.show_debug_bounds,
-    showRunProfiles: (state) => state.show_run_profiles
+    showRunProfiles: (state) => state.show_run_profiles,
+    showBuildpacks: (state) => state.show_buildpacks
 };
   
 const mutations = {
@@ -42,7 +45,10 @@ const mutations = {
     set_selector_pos: (state, pos) => state.selectorPos = pos,
     set_creating_node: (state, st) => state.creatingNode = st,
     set_debug_bounds: (state, st) => state.show_debug_bounds = st,
-    set_show_run_profiles: (state, st) => state.show_run_profiles = st
+    set_show_run_profiles: (state, st) => state.show_run_profiles = st,
+    set_dictionnaries: (state, st) => state.availableDictionnaries = st,
+    set_buildpacks: (state, st) => state.availableBuildpacks = st,
+    set_show_buildpacks: (state, st) => state.show_buildpacks = st,
 }
   
 const actions = {
@@ -51,9 +57,6 @@ const actions = {
     },
     update_editing(context, st) {
         context.commit('set_editing', st);
-    },
-    update_editing_dictionaries(context, st){
-        context.commit('set_editing_dictionaries', st)
     },
     update_selector_pos(context, pos){
         context.commit('set_selector_pos', pos);

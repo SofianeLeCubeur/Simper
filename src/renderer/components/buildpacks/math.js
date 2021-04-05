@@ -4,12 +4,25 @@ function remap(x, inMin, inMax, outMin, outMax) {
     return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
+function getReadableFileSizeString(fileSizeInBytes) {
+    var i = -1;
+    var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
+    do {
+        fileSizeInBytes = fileSizeInBytes / 1024;
+        i++;
+    } while (fileSizeInBytes > 1024);
+
+    return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
+}
+
 export default class MathPlan extends Buildpack {
 
+    static buildpackVersion = 'v1.0.0';
+
     constructor(){
-        super('MathPlan', 'v0.1.0');
+        super('MathPlan');
         this._requiredDictionaries = ['basic_input', 'misc', 'math', 'math_plan'];
-        this._requiredInputNodes = ['X', 'Y'];
+        this._requiredInputNodes = ['X'];
         this._requiredOutputNodes = ['Graph'];
     }
 
@@ -20,9 +33,6 @@ export default class MathPlan extends Buildpack {
         })[0];
         this._xinput = nodes.filter(node => {
             return node.reference === 'buildpack/MathPlan:input0'
-        })[0];
-        this._yinput = nodes.filter(node => {
-            return node.reference === 'buildpack/MathPlan:input1'
         })[0];
 
         this.nodes = [...nodes];
@@ -36,7 +46,7 @@ export default class MathPlan extends Buildpack {
         let yMin = -10;
         let xMax = 10;
         let yMax = 10;
-        let step = 0.01;
+        let step = 0.075757575757576;
         if(output && output[0]){
             output = output[0];
             console.log(output);
@@ -57,11 +67,13 @@ export default class MathPlan extends Buildpack {
             }
         }
         let points = [];
+        let start = Date.now();
+        const count = Math.ceil((Math.abs(xMin) + Math.abs(xMax)) / step);
+        const bytes = count * 64;
 
+        console.printLog({content: '%c[Graph] Starting plotting of ' + count + ' points (' + getReadableFileSizeString(bytes) + ' in RAM)', $style: ['color:#bada55'], tag: 'Debug'})
         for(let x = xMin; x <= xMax; x += step){
-            this._xinput.setGenerator((inputs, stateOutput) => {
-                stateOutput[0] = x
-            });
+            this._xinput.setGenerator((inputs, stateOutput) => stateOutput[0] = x);
 
             this.prepare(script, nodes);
             this.doRun();
@@ -70,7 +82,7 @@ export default class MathPlan extends Buildpack {
             if(output && output[0]){
                 output = output[0];
                 if(output.x !== undefined){
-                    pX = x;
+                    pX = output.x;
                 }
                 let y = output.y;
         
@@ -81,7 +93,8 @@ export default class MathPlan extends Buildpack {
         }
 
         const ctx = this._graph._preview.getContext('2d');
-        console.log('Rendering ' + points.length + ' points');
+        console.printLog({content: '%c[Graph] Finished plotting  in ' + (Date.now()-start) + 'ms', $style: ['color:#bada55'], tag: 'Debug'})
+        console.printLog({content: '%c[Graph] Rendering ' + points.length + ' points', $style: ['color:#bada55'], tag: 'Debug'})
         this._graph._renderPoints(ctx, this._graph._preview, points);
     }
 
